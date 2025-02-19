@@ -1,2 +1,6 @@
 # Ignore macOS system files
 .DS_Store
+
+# Ignore Drupal settings files
+web/sites/default/settings.php
+web/sites/default/settings.local.php
