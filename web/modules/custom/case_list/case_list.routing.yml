@@ -5,3 +5,11 @@ case_list.page:
     _title: 'Cases'
   requirements:
     _permission: 'access content'
+
+case_list.case:
+  path: '/cases/{case_id}'
+  defaults:
+    _controller: '\Drupal\case_list\Controller\CaseListController::viewCase'
+    _title: 'Case Details'
+  requirements:
+    _permission: 'access content'

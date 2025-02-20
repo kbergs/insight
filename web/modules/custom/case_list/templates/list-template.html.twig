@@ -1,0 +1,11 @@
+<div class="case-list">
+  
+  {# Render the search form #}
+  {{ search_form }}
+
+  <ul>
+    {% for item in items %}
+      <li>{{ item }}</li>
+    {% endfor %}
+  </ul>
+</div> 
