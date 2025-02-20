@@ -1,0 +1,7 @@
+case_list.page:
+  path: '/cases'
+  defaults:
+    _controller: '\Drupal\case_list\Controller\CaseListController::listCases'
+    _title: 'Cases'
+  requirements:
+    _permission: 'access content'

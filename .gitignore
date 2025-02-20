@@ -33,3 +33,15 @@ temp/
 
 # Ignore multi-site test environment
 web/sites/simpletest
+
+# Ignore scripts
+scripts/
+
+# Ignore uv files
+.python-version
+pyproject.toml
+uv.lock
+.venv/
+
+# Ignore old data to be imported
+old_data/

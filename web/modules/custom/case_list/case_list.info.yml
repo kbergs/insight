@@ -1,0 +1,7 @@
+name: 'Case List'
+type: module
+description: 'Provides a page to display a list of cases.'
+core_version_requirement: ^11
+package: Custom
+dependencies:
+  - drupal:node
