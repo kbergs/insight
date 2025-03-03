@@ -1,0 +1,74 @@
+# Schema for the configuration files of the SMS Phone Number module.
+
+# Custom settings schema.
+phonenumber_verification.settings:
+  type: config_object
+  label: "Phone verification settings"
+  mapping:
+    tfa_field:
+      type: string
+      label: "Two Factor Authentication user field"
+    verification_secret:
+      type: string
+      label: "Verification secret"
+
+# Storage schema.
+field.storage.*.third_party.phonenumber_verification:
+  type: mapping
+  label: 'Storage settings'
+  mapping:
+    verified:
+      type: integer
+      label: 'Verified'
+
+field.field.*.*.*.third_party.phonenumber_verification:
+  type: mapping
+  label: 'Phone extra settings for verification'
+  mapping:
+    verify:
+      type: string
+      label: 'Verification'
+    message:
+      type: string
+      label: 'Verification message'
+    length:
+      type: integer
+      label: 'Length of verification code'
+    verify_interval:
+      type: integer
+      label: 'Verification attempts interval'
+    verify_count:
+      type: integer
+      label: 'Verification attempts count'
+    sms_interval:
+      type: integer
+      label: 'SMS attempts interval'
+    sms_count:
+      type: integer
+      label: 'SMS attempts count'
+    type:
+      type: sequence
+      label: 'Allowed types'
+      sequence:
+        type: integer
+        label: 'Types'
+    country:
+      type: sequence
+      label: 'Allowed countries'
+      sequence:
+        type: string
+        label: 'Countries'
+
+# Widget settings schema.
+field.widget.settings.phone_default:
+  type: mapping
+  label: 'Phone default format settings'
+  mapping:
+    separate_verification_code:
+      type: boolean
+      label: 'Separate verification code'
+
+# Formatter settings schema.
+field.formatter.settings.phone_verified:
+  type: field.formatter.settings.phone_verified
+  label: 'Phone verified status formatter settings'

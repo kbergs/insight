@@ -1,0 +1,4 @@
+bypass phonenumber verification requirement:
+  title: "Bypass phone number verification requirement"
+  description: "Allows saving unverified phone numbers when verification is required."
+  restrict access: 1

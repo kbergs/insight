@@ -1,0 +1,39 @@
+{
+    "name": "drupal/phonenumber",
+    "description": "Defines a field type for international phone numbers.",
+    "type": "drupal-module",
+    "keywords": ["Drupal", "Phone", "PhoneNumber", "Phone Number", "Mobile", "MobileNumber", "Mobile Number", "Telephone", "Tel", "Field", "Field Formmater", "Verification Phone", "International Phone", "International", "Dial"],
+    "homepage": "https://www.drupal.org/project/phonenumber",
+    "support": {
+        "issues": "https://www.drupal.org/project/issues/phonenumber",
+        "source": "https://git.drupalcode.org/project/phonenumber"
+    },
+    "minimum-stability": "dev",
+    "require": {
+        "drupal/core": "^8.8 || ^9 || ^10 || ^11",
+        "giggsey/libphonenumber-for-php": "~8.0"
+    },
+    "extra": {
+        "drush": {
+            "services": {
+                "drush.services.yml": "^9 || ^10 || ^11"
+            }
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Drupal\\phonenumber\\": "src/",
+            "Drupal\\phonenumber_validation\\": "modules/phonenumber_validation/src/",
+            "Drupal\\phonenumber_verification\\": "modules/phonenumber_verification/src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Mahyar Sabeti",
+            "email": "mahyar.sbt7@gmail.com",
+            "homepage": "https://www.drupal.org/u/mahyarsbt",
+            "role": "Maintainer"
+        }
+    ],
+    "license": "GPL-2.0-or-later"
+}

@@ -1,0 +1,13 @@
+verification:
+  version: VERSION
+  css:
+    component:
+      css/phone-verification.css: {}
+  js:
+    js/phone-verification.js: {}
+  dependencies:
+    - core/jquery
+    - core/drupal
+    - core/once
+    - phonenumber/phone
+    - phonenumber/phonenumber.formatter

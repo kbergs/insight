@@ -1,0 +1,12 @@
+/**
+ * @file
+ * Phone number warning for when JavaScript is not loaded.
+ */
+html .dropbutton--small,
+html .dropbutton--extrasmall,
+html .dropbutton {
+  height: auto;
+}
+html .dropbutton-wrapper:not(.open) .dropbutton__item:first-of-type ~ .dropbutton__item {
+  visibility: visible;
+}

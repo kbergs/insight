@@ -1,0 +1,158 @@
+# Schema for the configuration files of the PhoneNumber module.
+
+field.value.phone:
+  type: mapping
+  label: 'Default value'
+  mapping:
+    phone_number:
+      type: string
+      label: 'International phone number'
+    local_number:
+      type: string
+      label: 'Local number'
+    country_code:
+      type: string
+      label: 'Country code'
+    country_iso2:
+      type: string
+      label: 'Country ISO alpha-2'
+    extension:
+      type: string
+      label: 'Extension number'
+
+# Storage schema.
+field.storage_settings.phone:
+  type: mapping
+  label: 'Storage settings'
+  mapping:
+    unique:
+      type: boolean
+      label: 'Unique'
+
+# Field settings schema.
+field.field_settings.phone:
+  type: base_phone_field_field_settings
+  label: 'Phone settings'
+  mapping:
+    strict_mode:
+      type: boolean
+      label: 'Strict mode'
+    national_mode:
+      type: boolean
+      label: 'National mode'
+    allowed:
+      type: string
+      label: 'Choose allowed countries to include/exclude from the list'
+    countries:
+      type: sequence
+      label: 'Countries include/exclude list'
+      sequence:
+        type: string
+    country_order:
+      type: sequence
+      label: 'Ordering for the country list'
+      sequence:
+        type: string
+    geo_ip_lookup:
+      type: string
+      label: 'GeoIP lookup'
+    api_key:
+      type: string
+      label: 'GeoIP lookup'
+    validation_number_type:
+      type: string
+      label: 'Validation number type'
+    placeholder_number_type:
+      type: string
+      label: 'Placeholder number type'
+    auto_placeholder:
+      type: string
+      label: 'Auto placeholder'
+    custom_placeholder:
+      type: label
+      label: 'Custom placeholder'
+    container_class:
+      type: string
+      label: 'Container class'
+    extension_field:
+      type: boolean
+      label: 'Enable extension field'
+    localise_country:
+      type: boolean
+      label: 'Localise country names'
+    i18n:
+      type: sequence
+      label: 'Internationalisation countries'
+      sequence:
+        type: string
+
+# Widget settings schema.
+field.widget.settings.phone_default:
+  type: mapping
+  label: 'Phone default format settings'
+  mapping:
+    initial_country:
+      type: string
+      label: 'Default country'
+    preferred_countries:
+      type: sequence
+      label: 'Top list countries'
+      sequence:
+        type: string
+    allow_dropdown:
+      type: boolean
+      label: 'Allow dropdown'
+    fix_dropdown_width:
+      type: boolean
+      label: 'Fix dropdown width'
+    separate_dial_code:
+      type: boolean
+      label: 'Separate dial code'
+    show_flags:
+      type: boolean
+      label: 'Show flags'
+    country_search:
+      type: boolean
+      label: 'Country search'
+    format_as_you_type:
+      type: boolean
+      label: 'Format as you type'
+    format_on_display:
+      type: boolean
+      label: 'Format on display'
+    use_fullscreen_popup:
+      type: boolean
+      label: 'Use fullscreen popup'
+    remove_start_zero:
+      type: boolean
+      label: 'Remove start zero'
+    mask_formatter:
+      type: boolean
+      label: 'Mask formatter'
+    show_error:
+      type: boolean
+      label: 'Show inline error'
+
+# Formatter settings schema.
+field.formatter.settings.phone_international:
+  type: mapping
+  label: 'Phone international format settings'
+  mapping:
+    title:
+      type: label
+      label: 'Title to replace basic numeric phone number display'
+    link:
+      type: boolean
+      label: 'Link to display phone number in tel format'
+
+field.formatter.settings.phone_national:
+  type: field.formatter.settings.phone_international
+  label: 'Phone national format settings'
+
+field.formatter.settings.phone_country:
+  type: mapping
+  label: 'Country formatter settings'
+  mapping:
+    type:
+      type: string
+      label: 'Type of country display'

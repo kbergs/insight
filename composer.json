@@ -16,9 +16,11 @@
     ],
     "require": {
         "composer/installers": "^2.3",
+        "drupal/address": "^2.0",
         "drupal/core-composer-scaffold": "^11.1",
         "drupal/core-project-message": "^11.1",
         "drupal/core-recommended": "^11.1",
+        "drupal/phonenumber": "^1.0@beta",
         "drush/drush": "^13.3"
     },
     "conflict": {

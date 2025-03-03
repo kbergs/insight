@@ -1,0 +1,131 @@
+<?php
+
+/**
+ * @file
+ * Defines an international phone number field type.
+ */
+
+use Drupal\Core\Field\FieldTypeCategoryManagerInterface;
+use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\Core\Url;
+
+/**
+ * Implements hook_help().
+ */
+function phonenumber_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    case 'help.page.phonenumber':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('The Phone Number module allows you to create fields that contain international phone numbers. See the <a href=":field">Field module help</a> and the <a href=":field_ui">Field UI help</a> pages for general information on fields and how to create and manage them. For more information, see the <a href=":telephone_documentation">online documentation for the Telephone module</a>.', [
+        ':field' => Url::fromRoute('help.page', ['name' => 'field'])->toString(),
+        ':field_ui' => (\Drupal::moduleHandler()->moduleExists('field_ui')) ? Url::fromRoute('help.page', ['name' => 'field_ui'])->toString() : '#',
+        ':telephone_documentation' => 'https://www.drupal.org/documentation/modules/telephone',
+      ]) . '</p>';
+      $output .= '<h3>' . t('Uses') . '</h3>';
+      $output .= '<dl>';
+      $output .= '<dt>' . t('Managing and displaying phone fields') . '</dt>';
+      $output .= '<dd>' . t('The <em>settings</em> and the <em>display</em> of the telephone field can be configured separately. See the <a href=":field_ui">Field UI help</a> for more information on how to manage fields and their display.', [
+        ':field_ui' => (\Drupal::moduleHandler()->moduleExists('field_ui')) ? Url::fromRoute('help.page', ['name' => 'field_ui'])->toString() : '#',
+      ]) . '</dd>';
+      $output .= '<dt>' . t('Displaying international phone numbers as links') . '</dt>';
+      $output .= '<dd>' . t('Phone numbers can be displayed as links with the scheme name <em>tel:</em> by choosing the <em>Phone</em> display format on the <em>Manage display</em> page. Any spaces will be stripped out of the link text. This semantic markup improves the user experience on mobile and assistive technology devices.') . '</dd>';
+      $output .= '</dl>';
+      return $output;
+  }
+}
+
+/**
+ * Implements hook_field_formatter_info_alter().
+ */
+function phonenumber_field_formatter_info_alter(&$info) {
+  $info['string']['field_types'][] = 'phone';
+}
+
+/**
+ * Implements hook_field_type_category_info_alter().
+ */
+function phonenumber_field_type_category_info_alter(&$definitions) {
+  // The `phone` field type belongs in the `general` category, so the
+  // libraries need to be attached using an alter hook.
+  $definitions[FieldTypeCategoryManagerInterface::FALLBACK_CATEGORY]['libraries'][] = 'phonenumber/phonenumber.phone-icon';
+}
+
+/**
+ * Phone GeoIP lookup services.
+ */
+function phonenumber_geo_ip_lookup_services() {
+  $services = [];
+
+  $services['ip2c'] = [
+    'title' => t('ip2c.co'),
+    'url' => 'https://ip2c.org/self',
+    'type' => 'text',
+    'script' => 'const [status, country] = String(data).split(";"); return country;',
+    'signup' => FALSE,
+  ];
+
+  $services['ipapi'] = [
+    'title' => t('ipapi.co'),
+    'url' => 'https://ipapi.co/json',
+    'type' => 'json',
+    'script' => 'return data.country_code;',
+    'signup' => FALSE,
+  ];
+
+  $services['ip-api'] = [
+    'title' => t('ip-api.com'),
+    'url' => 'http://ip-api.com/json',
+    'type' => 'json',
+    'script' => 'return data.countryCode;',
+    'signup' => FALSE,
+  ];
+
+  $services['ipwhois'] = [
+    'title' => t('ipwhois.io'),
+    'url' => 'http://ipwho.is/',
+    'type' => 'json',
+    'script' => 'return data.country_code;',
+    'signup' => FALSE,
+  ];
+
+  $services['geoplugin'] = [
+    'title' => t('geoplugin.com'),
+    'url' => 'http://www.geoplugin.net/json.gp',
+    'type' => 'json',
+    'script' => 'return data.geoplugin_countryCode;',
+    'signup' => FALSE,
+  ];
+
+  $services['ipgeolocation'] = [
+    'title' => t('ipgeolocation.io'),
+    'url' => 'https://api.ipgeolocation.io/ipgeo?apiKey=',
+    'type' => 'json',
+    'script' => 'return data.country_code2;',
+    'signup' => TRUE,
+  ];
+
+  $additional_services = \Drupal::moduleHandler()->invokeAll('phonenumber_geo_ip_lookup_service', [$services]);
+  return count($additional_services) ? array_merge($services, $additional_services) : $services;
+}
+
+/**
+ * Phone placeholder number types.
+ */
+function phonenumber_number_types() {
+  return [
+    "" => t('None'),
+    "FIXED_LINE" => t('Fixed line'),
+    "MOBILE" => t('Mobile'),
+    "FIXED_LINE_OR_MOBILE" => t('Fixed line or mobile'),
+    "TOLL_FREE" => t('Toll free'),
+    "PREMIUM_RATE" => t('Premium rate'),
+    "SHARED_COST" => t('Shared cost'),
+    "VOIP" => t('VoIP'),
+    "PERSONAL_NUMBER" => t('Personal number'),
+    "PAGER" => t('Pager'),
+    "UAN" => t('UAN'),
+    "VOICEMAIL" => t('Voicemail'),
+    "UNKNOWN" => t('Unknown'),
+  ];
+}

@@ -1,0 +1,12 @@
+name: 'PhoneNumber'
+description: 'Defines a field type for international phone numbers.'
+type: module
+package: Field types
+core_version_requirement: ^8.8 || ^9 || ^10 || ^11
+dependencies:
+  - drupal:field
+
+# Information added by Drupal.org packaging script on 2025-02-09
+version: '1.0.0-beta1'
+project: 'phonenumber'
+datestamp: 1739143717

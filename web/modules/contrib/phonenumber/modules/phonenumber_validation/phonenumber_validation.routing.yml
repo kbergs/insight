@@ -1,0 +1,8 @@
+phonenumber_validation.settings:
+  path: '/admin/config/content/phonenumber_validation'
+  defaults:
+    _form: '\Drupal\phonenumber_validation\Form\SettingsForm'
+    _title: 'Default phonenumber validation criteria'
+    _description: 'Save default validation criteria. Those options can be modified per form element.'
+  requirements:
+    _permission: 'administer site configuration'

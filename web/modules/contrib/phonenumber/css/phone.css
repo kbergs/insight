@@ -1,0 +1,31 @@
+.iti__dropdown-content {
+  width: auto !important;
+  min-width: 210px;
+  white-space: nowrap;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+.field--type-phone .form-item--extension,
+.field--type-phone .form-item--local-number,
+.phone-number-field .form-item--extension,
+.phone-number-field .form-item--local-number {
+  margin: 0;
+}
+.field--type-phone .form-type--phone,
+.field--type-phone .form-item--extension,
+.field--type-phone .form-type--textfield,
+.field--type-phone .form-item--local-number,
+.phone-number-field .form-type--phone,
+.phone-number-field .form-item--extension,
+.phone-number-field .form-type--textfield,
+.phone-number-field .form-item--local-number {
+  display: inline-grid;
+}
+.field--type-phone input.form-phone,
+.phone-number-field .input.form-phone {
+  min-width: 210px;
+}
+.field--type-phone .phone-error-msg,
+.phone-number-field .phone-error-msg {
+  display: none;
+}

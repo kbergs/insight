@@ -1,0 +1,4 @@
+services:
+  phonenumber_verification.verifier:
+    class: Drupal\phonenumber_verification\PhoneVerifier
+    arguments: ['@config.factory', '@entity_field.manager', '@module_handler', '@country_manager', '@phonenumber_validation.validator', '@csrf_token', '@database', '@token', '@flood']
