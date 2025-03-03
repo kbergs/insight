@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: drupal
+  namespace: drupal
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: drupal
+  template:
+    metadata:
+      labels:
+        app: drupal
+    spec:
+      containers:
+      - name: drupal
+        image: drupal:latest
+        env:
+          - name: DRUPAL_DB_HOST
+            value: "mariadb"   # Name of the MariaDB service
+          - name: DRUPAL_DB_NAME
+            value: "root"    # The database name
+          - name: DRUPAL_DB_USER
+            value: "root"      # The username for the database
+          - name: DRUPAL_DB_PASSWORD
+            value: "rootpassword"  # The password for the database
+        ports:
+          - containerPort: 80
+
