@@ -1,0 +1,13 @@
+name: 'PhoneNumber Validation'
+description: 'International phone number validation based on Google libphonenumber PHP library.'
+type: module
+package: Field types
+configure: phonenumber_validation.settings
+core_version_requirement: ^8.8 || ^9 || ^10 || ^11
+dependencies:
+  - phonenumber:phonenumber
+
+# Information added by Drupal.org packaging script on 2025-02-09
+version: '1.0.0-beta1'
+project: 'phonenumber'
+datestamp: 1739143717

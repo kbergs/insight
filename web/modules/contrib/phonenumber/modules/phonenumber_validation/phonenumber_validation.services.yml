@@ -1,0 +1,4 @@
+services:
+  phonenumber_validation.validator:
+    class: Drupal\phonenumber_validation\PhoneValidator
+    arguments: ['@country_manager']

@@ -1,0 +1,58 @@
+<?php
+
+/**
+ * @file
+ * Requirements and update functions for the PhoneNumber Validation module.
+ */
+
+/**
+ * Implements hook_requirements().
+ */
+function phonenumber_validation_requirements($phase) {
+  // Return an empty array if the phase is not 'install'.
+  if ($phase != 'install') {
+    return [];
+  }
+
+  $requirements = [];
+
+  // Check if the Libphonenumber library exists.
+  $libphonenumber_exists = class_exists('\\libphonenumber\\PhoneNumberUtil');
+
+  // Set the description based on the library's existence.
+  if ($libphonenumber_exists) {
+    $description = t('The libphonenumber-for-php library is installed correctly.');
+  }
+  else {
+    $description = t('The <em>Phone Number Validation</em> module requires the <a href="@giggsey" rel="external" target="_blank">libphonenumber-for-php</a> library. This module can only be installed with Composer and requires the <strong>libphonenumber-for-php</strong> library to be installed via Composer. For more information, please read <a href="@composer" rel="external" target="_blank">"Download contributed module and their dependencies using Composer"</a>.', [
+      '@giggsey' => 'https://github.com/giggsey/libphonenumber-for-php',
+      '@composer' => 'https://www.drupal.org/node/2718229#managing-contributed',
+    ]);
+  }
+
+  // Prepare the library requirements status.
+  $requirements['phonenumber_validation'] = [
+    'title'       => t('Libphonenumber for PHP'),
+    'value'       => $libphonenumber_exists ? t('Installed') : t('Not installed'),
+    'severity'    => $libphonenumber_exists ? REQUIREMENT_OK : REQUIREMENT_ERROR,
+    'description' => $description,
+  ];
+
+  return $requirements;
+}
+
+/**
+ * Implements hook_install().
+ */
+function phonenumber_validation_install() {
+  // Check if the Libphonenumber-for-PHP library is installed.
+  $libphonenumber_exists = class_exists('\\libphonenumber\\PhoneNumberUtil');
+  if ($libphonenumber_exists === FALSE) {
+    \Drupal::messenger()->addWarning(
+      t('The <em>Phone Number Validation</em> module requires the <a href=":giggsey" rel="external" target="_blank">libphonenumber-for-php</a> library. This module can only be installed with Composer and requires the <strong>libphonenumber-for-php</strong> library to be installed via Composer. For more information, please read <a href=":composer" rel="external" target="_blank">"Download contributed module and their dependencies using Composer"</a>.', [
+        ':giggsey' => 'https://github.com/giggsey/libphonenumber-for-php',
+        ':composer' => 'https://www.drupal.org/node/2718229#managing-contributed',
+      ])
+    );
+  }
+}

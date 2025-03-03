@@ -1,0 +1,27 @@
+phonenumber_validation.settings:
+  type: config_object
+  label: 'Phone Validation settings'
+  mapping:
+    format:
+      type: integer
+      label: 'Format'
+    country:
+      type: sequence
+      label: 'Countries'
+      sequence:
+        type: string
+        label: 'Country'
+
+field.field.*.*.*.third_party.phonenumber_validation:
+  type: mapping
+  label: 'Extra settings for validation'
+  mapping:
+    format:
+      type: integer
+      label: 'Format'
+    country:
+      type: sequence
+      label: 'Countries'
+      sequence:
+        type: string
+        label: 'Country'

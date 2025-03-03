@@ -1,0 +1,61 @@
+<?php
+
+/**
+ * @file
+ * Provides phone number verification functionalities.
+ */
+
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\sms\Exception\RecipientRouteException;
+use Drupal\sms\Message\SmsMessage;
+
+/**
+ * Returns valid countries field on ajax request.
+ *
+ * @param array $form
+ *   The form structure.
+ * @param \Drupal\Core\Form\FormStateInterface $form_state
+ *   The current state of the form.
+ *
+ * @return array
+ *   The modified form element.
+ */
+function _phonenumber_verification_country_ajax_callback(array $form, FormStateInterface $form_state) {
+  return $form['phonenumber_validation']['country'];
+}
+
+/**
+ * SMS framework integration: send SMS callback.
+ *
+ * Sends an SMS message to a given phone number using the SMS framework.
+ *
+ * @param string $number
+ *   The E.164 formatted phone number.
+ * @param string $message
+ *   The message to send.
+ *
+ * @return bool
+ *   TRUE if the message was sent successfully, FALSE otherwise.
+ */
+function phonenumber_verification_send_sms($number, $message) {
+  /** @var \Drupal\sms\Provider\DefaultSmsProvider $sms_provider */
+  $sms_provider = \Drupal::service('sms.provider');
+  try {
+    // Create a new SMS message instance.
+    $sms_message = new SmsMessage(NULL, [$number], $message);
+
+    /** @var \Drupal\sms\Message\SmsMessageResultInterface $result */
+    $result = $sms_provider->send($sms_message)[0];
+
+    // Return the status of the SMS message.
+    return $result->getResult()->getReport($number)->getStatus();
+  }
+  catch (RecipientRouteException $e) {
+    // Log the exception and return FALSE if an error occurs.
+    \Drupal::logger('phonenumber_verification')->error('Failed to send SMS to @number. Error: @error', [
+      '@number' => $number,
+      '@error' => $e->getMessage(),
+    ]);
+    return FALSE;
+  }
+}

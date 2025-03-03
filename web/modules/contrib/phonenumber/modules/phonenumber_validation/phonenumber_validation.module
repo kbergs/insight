@@ -1,0 +1,158 @@
+<?php
+
+/**
+ * @file
+ * Validate international phone number.
+ */
+
+use Drupal\Core\Ajax\AjaxResponse;
+use Drupal\Core\Ajax\HtmlCommand;
+use Drupal\Core\Form\FormStateInterface;
+use libphonenumber\PhoneNumberFormat;
+
+/**
+ * Implements hook_element_info_alter().
+ */
+function phonenumber_validation_element_info_alter(array &$types) {
+  // Retrieve configuration entity.
+  $config = \Drupal::config('phonenumber_validation.settings');
+  // Adds default validation settings to phonenumber element.
+  // This is just for convenience and to improve DX. You can override
+  // the following settings at any time on the form definition level.
+  $types['phone']['#element_validate_settings'] = [
+    'format' => $config->get('format') ?: PhoneNumberFormat::E164,
+    'country' => $config->get('country') ?: [],
+  ];
+}
+
+/**
+ * Implements hook_field_info_alter().
+ */
+function phonenumber_validation_field_info_alter(&$info) {
+  // Add validation constraint to phone field.
+  $info['phone']['constraints']['PhoneValidation'] = [];
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function phonenumber_validation_form_field_config_edit_form_alter(&$form, FormStateInterface &$form_state) {
+  /** @var \Drupal\field\Entity\FieldConfig $field */
+  $field = $form_state->getFormObject()->getEntity();
+
+  // Check field type and add config form but only if field type is phone.
+  if ($field->getType() == 'phone') {
+    /** @var \Drupal\phonenumber_validation\PhoneValidator $phone_validator */
+    $phone_validator = \Drupal::service('phonenumber_validation.validator');
+
+    // Load the phonenumber validation global settings configuration.
+    $config = \Drupal::config('phonenumber_validation.settings');
+    $format = $config->get('format');
+    $country = $config->get('country');
+
+    // Let people decide if they want to have validation on or off per instance.
+    $settings = $field->getThirdPartySettings('phonenumber_validation');
+    $form['validation'] = [
+      '#type' => 'checkbox',
+      '#title' => t('Enable validation'),
+      '#default_value' => !empty($settings),
+    ];
+    $form['phonenumber_validation'] = [
+      '#type' => 'details',
+      '#title' => t('Phone validation'),
+      '#open' => TRUE,
+      '#states' => [
+        'invisible' => [
+          ':input[name="validation"]' => ['checked' => FALSE],
+        ],
+      ],
+    ];
+
+    // Choose which phone number format is valid for this field.
+    $form['phonenumber_validation']['format'] = [
+      '#type' => 'select',
+      '#title' => t('Format'),
+      '#description' => t('Validation format. It is recommended to use the E164 validation format. The validator will automatically determine the country of origin. If you want to limit the field instance to only one country, you can change it to National format and choose a country in the field below.'),
+      '#default_value' => $field->getThirdPartySetting('phonenumber_validation', 'format', $format),
+      '#options' => [
+        PhoneNumberFormat::E164 => t('E164'),
+        PhoneNumberFormat::NATIONAL => t('National'),
+      ],
+      '#ajax' => [
+        'callback' => '_phonenumber_validation_country_ajax_callback',
+        'wrapper' => 'phonenumber-validation-country',
+        'method' => 'replace',
+        'effect' => 'fade',
+      ],
+    ];
+
+    // Define available countries (or country if format = NATIONAL).
+    $default_format = $field->getThirdPartySetting('phonenumber_validation', 'format', $format);
+    $current_format = $form_state->getValue('format')
+      ?? $form['phonenumber_validation']['format']['#default_value']
+      ?? $default_format;
+
+    // Add country select element.
+    $form['phonenumber_validation']['country'] = [
+      '#type' => 'select',
+      '#title' => t('Country'),
+      '#description' => t('If no country is selected, all countries are valid.'),
+      '#default_value' => $field->getThirdPartySetting('phonenumber_validation', 'country', $country),
+      '#multiple' => $current_format != PhoneNumberFormat::NATIONAL,
+      '#options' => $phone_validator->getCountryList(),
+      '#prefix' => '<div id="phonenumber-validation-country">',
+      '#suffix' => '</div>',
+    ];
+
+    // Add submit handler.
+    $form['actions']['submit']['#submit'][] = 'phonenumber_validation_form_field_config_edit_form_submit';
+  }
+}
+
+/**
+ * Form submit handler.
+ */
+function phonenumber_validation_form_field_config_edit_form_submit(&$form, FormStateInterface $form_state) {
+  /** @var \Drupal\field\Entity\FieldConfig $field */
+  $field = $form_state->getFormObject()->getEntity();
+  if ($form_state->getValue('validation', FALSE)) {
+    // Set format.
+    $field->setThirdPartySetting('phonenumber_validation', 'format', $form_state->getValue('format'));
+    $country = $form_state->getValue('country');
+    // Set country.
+    $field->setThirdPartySetting('phonenumber_validation', 'country', is_array($country) ? $country : [$country]);
+  }
+  else {
+    // Unset third-party settings.
+    $field->unsetThirdPartySetting('phonenumber_validation', 'format');
+    $field->unsetThirdPartySetting('phonenumber_validation', 'country');
+  }
+  // Save field definition.
+  $field->save();
+}
+
+/**
+ * Updates the country field on AJAX request.
+ *
+ * @param array $form
+ *   An associative array containing the structure of the form.
+ * @param \Drupal\Core\Form\FormStateInterface $form_state
+ *   The current state of the form.
+ *
+ * @return \Drupal\Core\Ajax\AjaxResponse
+ *   An Ajax response object to update the country field.
+ */
+function _phonenumber_validation_country_ajax_callback(array $form, FormStateInterface $form_state): AjaxResponse {
+  $response = new AjaxResponse();
+
+  // Retrieve the current format from form state or default value.
+  $format = $form_state->getValue('format') ?: $form['phonenumber_validation']['format']['#default_value'];
+
+  // Update the country field's multiple selection property.
+  $form['phonenumber_validation']['country']['#multiple'] = ($format != PhoneNumberFormat::NATIONAL);
+
+  // Return the updated country field.
+  $response->addCommand(new HtmlCommand('#phonenumber-validation-country', $form['phonenumber_validation']['country']));
+
+  return $response;
+}

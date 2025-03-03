@@ -1,0 +1,117 @@
+<?php
+
+/**
+ * @file
+ * Install and schema definition for the PhoneNumber Verification module.
+ */
+
+use Drupal\Core\Entity\Sql\SqlContentEntityStorage;
+
+/**
+ * Implements hook_schema().
+ */
+function phonenumber_verification_schema() {
+
+  // Define the schema for the phonenumber_verification table.
+  $schema['phonenumber_verification'] = [
+    'description' => 'A table for storing verification codes for SMS Phone Numbers.',
+    'fields' => [
+      'token' => [
+        'description' => 'Verification token.',
+        'type' => 'varchar',
+        'length' => 43,
+        'not null' => TRUE,
+      ],
+      'timestamp' => [
+        'description' => 'The time when the verification token was created.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ],
+      'verification_code' => [
+        'description' => 'Hash of the code sent to the user.',
+        'type' => 'varchar',
+        'length' => 40,
+        'not null' => TRUE,
+      ],
+    ],
+    'indexes' => [
+      'token_created' => ['timestamp'],
+    ],
+    'primary key' => ['token'],
+  ];
+
+  return $schema;
+}
+
+/**
+ * Implements hook_install().
+ */
+function phonenumber_verification_install() {
+  // Generate a random verification secret and save it to the configuration.
+  \Drupal::configFactory()->getEditable('phonenumber_verification.settings')
+    ->set('verification_secret', \Drupal::csrfToken()->get('phonenumber verification secret' . rand(0, 999999999)))
+    ->save();
+
+  // Get the database connection.
+  $connection = \Drupal::database();
+  // Define the field type we are interested in.
+  $field_type = 'phone';
+  // Get the entity definition update manager.
+  $manager = \Drupal::entityDefinitionUpdateManager();
+  // Get the field map for the defined field type.
+  $field_map = \Drupal::service('entity_field.manager')->getFieldMapByFieldType($field_type);
+
+  // Iterate over all entities that have the phone field type.
+  foreach ($field_map as $entity_type_id => $fields) {
+    foreach (array_keys($fields) as $field_name) {
+      // Get the field storage definition for the current field.
+      $field_storage_definition = $manager->getFieldStorageDefinition($field_name, $entity_type_id);
+
+      // Get the storage for the current entity type.
+      $storage = \Drupal::entityTypeManager()->getStorage($entity_type_id);
+      if ($storage instanceof SqlContentEntityStorage) {
+        // Get the table mapping for the field.
+        $table_mapping = $storage->getTableMapping([
+          // Pass only one storage definition to return only tables we need.
+          $field_name => $field_storage_definition,
+        ]);
+        // Get the names of the dedicated tables.
+        $table_names = $table_mapping->getDedicatedTableNames();
+        // Get the column names for the current field.
+        $columns = $table_mapping->getColumnNames($field_name);
+        // Iterate over the table names.
+        foreach ($table_names as $table_name) {
+          // Get the schema for the field.
+          $field_schema = $field_storage_definition->getSchema();
+          // Add the verified field if it doesn't exist and DB is not SQLite.
+          if (!$connection->schema()->fieldExists($table_name, $columns['verified']) && $connection->databaseType() != 'sqlite') {
+            $connection->schema()->addField($table_name, $columns['verified'], $field_schema['columns']['verified']);
+          }
+          // Add tfa field if not exists and DB is not SQLite.
+          if (!$connection->schema()->fieldExists($table_name, $columns['tfa']) && $connection->databaseType() != 'sqlite') {
+            $connection->schema()->addField($table_name, $columns['tfa'], $field_schema['columns']['tfa']);
+          }
+        }
+      }
+      // Update the field storage definition.
+      $manager->updateFieldStorageDefinition($field_storage_definition);
+    }
+  }
+
+  // Load all phone fields that are part of the phonenumber module.
+  $phone_fields = \Drupal::entityTypeManager()->getStorage('field_storage_config')->loadByProperties(['module' => 'phonenumber']);
+
+  // Iterate over the phone fields and update their dependencies.
+  foreach ($phone_fields as $phone_field) {
+    $dependencies = $phone_field->get('dependencies');
+    $phone_field->set('module', 'phonenumber_verification');
+    if (!isset($dependencies['module']) || !in_array('phonenumber_verification', $dependencies['module'])) {
+      $dependencies['module'][] = 'phonenumber_verification';
+      $phone_field->set('dependencies', $dependencies);
+    }
+    // Save the updated phone field configuration.
+    $phone_field->save();
+  }
+}
